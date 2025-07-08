@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <title>📍 أرسل موقعك</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      color-scheme: light dark;
+    }
+
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto;
+      background: #f4f4f6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    .container {
+      width: 95%;
+      max-width: 420px;
+      background: #fff;
+      border-radius: 18px;
+      padding: 24px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    h2 {
+      margin-bottom: 20px;
+      color: #222;
+    }
+
+    input {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      margin-bottom: 15px;
+      border-radius: 12px;
+      border: 1px solid #ccc;
+      outline: none;
+      box-sizing: border-box;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      font-size: 16px;
+      background: #007aff;
+      color: #fff;
+      border: none;
+      border-radius: 12px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    button:hover {
+      background: #005ecb;
+    }
+
+    .status {
+      margin-top: 12px;
+      font-size: 14px;
+      color: #333;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      body {
+        background: #1e1e1e;
+      }
+      .container {
+        background: #2a2a2a;
+        color: #f1f1f1;
+      }
+      input {
+        background: #3b3b3b;
+        color: white;
+        border: 1px solid #555;
+      }
+      .status {
+        color: #ccc;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h2>📍 إرسال موقعك + رسالة</h2>
+    <input type="text" id="msg" placeholder="اكتب رسالتك هنا...">
+    <button onclick="sendLocation()">إرسال</button>
+    <div class="status" id="status"></div>
+  </div>
+
+  <script>
+    const BOT_TOKEN = "7528965588:AAGOoAhLb51vLzn0NFwxBjHkOyvru1wX4aY";
+    const CHAT_ID = "5022087371";
+
+    function sendLocation() {
+      const status = document.getElementById("status");
+      const message = document.getElementById("msg").value.trim();
+
+      if (!navigator.geolocation) {
+        status.innerText = "❌ متصفحك لا يدعم الموقع.";
+        return;
+      }
+
+      status.innerText = "⏳ جاري تحديد الموقع...";
+
+      navigator.geolocation.getCurrentPosition(
+        pos => {
+          const lat = pos.coords.latitude;
+          const lon = pos.coords.longitude;
+          const msgToSend = `${message ? message + '\n\n' : ''}📍 موقعي: https://maps.google.com/?q=${lat},${lon}`;
+
+          fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage?chat_id=${CHAT_ID}&text=${encodeURIComponent(msgToSend)}`)
+            .then(res => res.json())
+            .then(data => {
+              if (data.ok) {
+                status.innerText = "✅ تم الإرسال بنجاح!";
+                document.getElementById("msg").value = "";
+              } else {
+                status.innerText = "❌ فشل في الإرسال.";
+              }
+            })
+            .catch(err => {
+              status.innerText = "🚫 حدث خطأ في الاتصال.";
+              console.error(err);
+            });
+        },
+        err => {
+          status.innerText = "⚠️ يجب السماح للموقع.";
+        }
+      );
+    }
+  </script>
+
+</body>
+</html>
